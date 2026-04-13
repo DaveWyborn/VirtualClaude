@@ -20,7 +20,7 @@ Built for people who use AI seriously but don't want to fight with terminals and
 
 ## What it costs
 
-- **VPS hosting:** ~$5/month (Hetzner CX22 recommended)
+- **VPS hosting:** ~£8/month (Hetzner CX22 recommended)
 - **Vercel frontend:** Free
 - **Claude:** Uses your existing Anthropic subscription — no extra API costs
 
@@ -46,7 +46,7 @@ You'll need about 30 minutes and no technical experience. If you have access to 
 
 | Thing | Where to get it | Cost |
 |---|---|---|
-| A VPS server | [hetzner.com](https://www.hetzner.com/cloud/) — pick CX22, Ubuntu 24.04 | ~$5/month |
+| A VPS server | [hetzner.com](https://www.hetzner.com/cloud/) — pick CX22, Ubuntu 24.04 | ~£8/month |
 | A GitHub account | [github.com](https://github.com/signup) | Free |
 | A Vercel account | [vercel.com](https://vercel.com/signup) | Free |
 | A domain or subdomain | Your existing domain, or buy one from [namecheap.com](https://www.namecheap.com) | Optional |
@@ -199,7 +199,7 @@ pm2 restart claude-workspace
 For the technically curious:
 
 ```
-Vercel (free)                    Your VPS ($5/month)
+Vercel (free)                    Your VPS (~£8/month)
 +------------------+             +---------------------------+
 | Next.js frontend | -- HTTPS -> | Express API server        |
 | - Project sidebar|             | - File management (CRUD)  |
