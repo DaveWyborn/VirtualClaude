@@ -40,6 +40,38 @@ app.use('/api', apiKeyAuth);
 app.use('/api/projects', projectsRouter);
 app.use('/api/projects', filesRouter);
 
+// Server stats
+const os = require('os');
+const { execSync } = require('child_process');
+
+app.get('/api/stats', (req, res) => {
+  const cpus = os.cpus();
+  const cpuIdle = cpus.reduce((sum, cpu) => sum + cpu.times.idle, 0) / cpus.length;
+  const cpuTotal = cpus.reduce((sum, cpu) => sum + Object.values(cpu.times).reduce((a, b) => a + b, 0), 0) / cpus.length;
+  const cpu = Math.round(((cpuTotal - cpuIdle) / cpuTotal) * 100);
+
+  const ramTotal = os.totalmem();
+  const ramUsed = ramTotal - os.freemem();
+
+  let diskUsed = 0;
+  let diskTotal = 0;
+  try {
+    const df = execSync("df -B1 / | tail -1", { encoding: 'utf8' }).trim().split(/\s+/);
+    diskTotal = parseInt(df[1], 10);
+    diskUsed = parseInt(df[2], 10);
+  } catch {
+    // fallback if df fails
+  }
+
+  res.json({
+    cpu,
+    ramUsed,
+    ramTotal,
+    diskUsed,
+    diskTotal
+  });
+});
+
 // Health check (no auth)
 app.get('/health', (req, res) => {
   res.json({ ok: true, uptime: process.uptime() });

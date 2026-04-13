@@ -139,6 +139,19 @@ export async function deleteFile(
   }
 }
 
+export interface ServerStats {
+  cpu: number;
+  ramUsed: number;
+  ramTotal: number;
+  diskUsed: number;
+  diskTotal: number;
+}
+
+export async function getServerStats(): Promise<ServerStats> {
+  const res = await fetch(`${API_URL}/api/stats`, { headers: headers() });
+  return handleResponse<ServerStats>(res);
+}
+
 export function getTerminalWsUrl(projectName: string): string {
   const wsBase = API_URL.replace(/^http/, "ws");
   return `${wsBase}/terminal?project=${encodeURIComponent(projectName)}&apiKey=${encodeURIComponent(API_KEY)}`;
