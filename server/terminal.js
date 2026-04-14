@@ -37,6 +37,13 @@ function setupTerminalWebSocket(wss) {
       return;
     }
 
+    const home = process.env.HOME || '/root';
+    const basePath = process.env.PATH || '/usr/local/bin:/usr/bin:/bin';
+    const localBin = `${home}/.local/bin`;
+    const fullPath = basePath.split(':').includes(localBin)
+      ? basePath
+      : `${localBin}:${basePath}`;
+
     let ptyProcess;
     try {
       ptyProcess = pty.spawn('bash', [], {
@@ -47,8 +54,8 @@ function setupTerminalWebSocket(wss) {
         env: {
           ...process.env,
           TERM: 'xterm-256color',
-          HOME: process.env.HOME || '/root',
-          PATH: process.env.PATH || '/usr/local/bin:/usr/bin:/bin',
+          HOME: home,
+          PATH: fullPath,
           SHELL: '/bin/bash'
         }
       });
