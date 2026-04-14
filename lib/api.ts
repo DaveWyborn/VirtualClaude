@@ -122,6 +122,29 @@ export async function uploadFile(
   }
 }
 
+export async function downloadFile(
+  projectName: string,
+  filePath: string,
+  fileName: string
+): Promise<void> {
+  const res = await fetch(
+    `${API_URL}/api/projects/${encodeURIComponent(projectName)}/files/${filePath}`,
+    { headers: headers() }
+  );
+  if (!res.ok) {
+    throw new Error(`Download failed: ${res.status}`);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export async function deleteFile(
   projectName: string,
   filePath: string

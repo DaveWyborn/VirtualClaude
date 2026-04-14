@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { FileNode, uploadFile, deleteFile, getFiles } from "@/lib/api";
+import { FileNode, uploadFile, deleteFile, downloadFile, getFiles } from "@/lib/api";
 import FilePreview from "./FilePreview";
 
 interface FileBrowserProps {
@@ -17,12 +17,14 @@ function FileTreeItem({
   projectName,
   onDelete,
   onPreview,
+  onDownload,
 }: {
   node: FileNode;
   depth: number;
   projectName: string;
   onDelete: (path: string) => void;
   onPreview: (path: string, name: string) => void;
+  onDownload: (path: string, name: string) => void;
 }) {
   const [expanded, setExpanded] = useState(depth < 1);
 
@@ -61,6 +63,19 @@ function FileTreeItem({
           {node.name}
         </span>
 
+        {!isDir && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDownload(node.path, node.name);
+            }}
+            className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all text-xs shrink-0"
+            title="Download"
+          >
+            {"\u2B73"}
+          </button>
+        )}
+
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -83,6 +98,7 @@ function FileTreeItem({
               projectName={projectName}
               onDelete={onDelete}
               onPreview={onPreview}
+              onDownload={onDownload}
             />
           ))}
           {node.children.length === 0 && (
@@ -161,6 +177,17 @@ export default function FileBrowser({
     [projectName, onRefresh]
   );
 
+  const handleDownloadFile = useCallback(
+    async (filePath: string, fileName: string) => {
+      try {
+        await downloadFile(projectName, filePath, fileName);
+      } catch (err) {
+        alert(`Failed to download: ${err instanceof Error ? err.message : "Unknown error"}`);
+      }
+    },
+    [projectName]
+  );
+
   return (
     <div className="flex-1 min-w-0 flex flex-col bg-white overflow-hidden">
       <div className="flex items-center justify-between px-3 py-3 border-b border-gray-200 gap-2">
@@ -220,6 +247,7 @@ export default function FileBrowser({
             projectName={projectName}
             onDelete={handleDeleteFile}
             onPreview={(path, name) => setPreview({ path, name })}
+            onDownload={handleDownloadFile}
           />
         ))}
       </div>
