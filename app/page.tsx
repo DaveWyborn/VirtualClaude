@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import Sidebar from "@/components/Sidebar";
 import FileBrowser from "@/components/FileBrowser";
@@ -15,6 +15,10 @@ import {
 
 const Terminal = dynamic(() => import("@/components/Terminal"), { ssr: false });
 
+const MIN_WIDTH = 180;
+const MAX_WIDTH = 800;
+const DEFAULT_WIDTH = 320;
+
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
@@ -22,6 +26,53 @@ export default function Home() {
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filesWidth, setFilesWidth] = useState<number>(DEFAULT_WIDTH);
+  const [filesCollapsed, setFilesCollapsed] = useState(false);
+  const draggingRef = useRef(false);
+
+  // Restore persisted width/collapsed state
+  useEffect(() => {
+    const w = localStorage.getItem("filesWidth");
+    const c = localStorage.getItem("filesCollapsed");
+    if (w) setFilesWidth(Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, parseInt(w, 10))));
+    if (c === "true") setFilesCollapsed(true);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("filesWidth", String(filesWidth));
+  }, [filesWidth]);
+
+  useEffect(() => {
+    localStorage.setItem("filesCollapsed", String(filesCollapsed));
+  }, [filesCollapsed]);
+
+  // Drag handlers
+  useEffect(() => {
+    const handleMove = (e: MouseEvent) => {
+      if (!draggingRef.current) return;
+      const sidebarWidth = 224; // w-56
+      const newWidth = e.clientX - sidebarWidth;
+      setFilesWidth(Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth)));
+    };
+    const handleUp = () => {
+      draggingRef.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+  }, []);
+
+  const startDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    draggingRef.current = true;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  };
 
   // Load projects on mount
   useEffect(() => {
@@ -147,11 +198,32 @@ export default function Home() {
 
       {!error && selectedProject && (
         <>
-          <FileBrowser
-            projectName={selectedProject}
-            files={files}
-            onRefresh={handleRefreshFiles}
-          />
+          {!filesCollapsed && (
+            <>
+              <div style={{ width: filesWidth }} className="shrink-0 flex flex-col">
+                <FileBrowser
+                  projectName={selectedProject}
+                  files={files}
+                  onRefresh={handleRefreshFiles}
+                  onCollapse={() => setFilesCollapsed(true)}
+                />
+              </div>
+              <div
+                onMouseDown={startDrag}
+                className="w-1 shrink-0 cursor-col-resize bg-gray-200 hover:bg-blue-400 transition-colors"
+                title="Drag to resize"
+              />
+            </>
+          )}
+          {filesCollapsed && (
+            <button
+              onClick={() => setFilesCollapsed(false)}
+              className="w-6 shrink-0 bg-gray-100 hover:bg-gray-200 border-r border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors"
+              title="Show files"
+            >
+              {"\u25B6"}
+            </button>
+          )}
           <Terminal projectName={selectedProject} />
         </>
       )}

@@ -8,6 +8,7 @@ interface FileBrowserProps {
   projectName: string;
   files: FileNode[];
   onRefresh: () => void;
+  onCollapse?: () => void;
 }
 
 function FileTreeItem({
@@ -102,6 +103,7 @@ export default function FileBrowser({
   projectName,
   files,
   onRefresh,
+  onCollapse,
 }: FileBrowserProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
@@ -160,16 +162,27 @@ export default function FileBrowser({
   );
 
   return (
-    <div className="flex-1 min-w-[300px] flex flex-col border-r border-gray-200 bg-white">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-        <h2 className="text-sm font-semibold text-gray-700">Files</h2>
-        <div className="flex items-center gap-2">
+    <div className="flex-1 min-w-0 flex flex-col bg-white overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-3 border-b border-gray-200 gap-2">
+        <div className="flex items-center gap-1 min-w-0">
+          {onCollapse && (
+            <button
+              onClick={onCollapse}
+              className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0"
+              title="Hide files"
+            >
+              {"\u25C0"}
+            </button>
+          )}
+          <h2 className="text-sm font-semibold text-gray-700 truncate">Files</h2>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={onRefresh}
             className="text-xs text-gray-500 hover:text-gray-700 transition-colors px-2 py-1 rounded hover:bg-gray-100"
             title="Refresh files"
           >
-            {"\u21BB"} Refresh
+            {"\u21BB"}
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
