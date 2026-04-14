@@ -60,9 +60,11 @@ Click the **Fork** button at the top right of this page. This creates your own c
 1. Go to [vercel.com](https://vercel.com) and sign in with your GitHub account
 2. Click **Add New Project**
 3. Find and select your forked copy of VirtualClaude
-4. Add two environment variables (leave the values blank for now — you'll fill them in at the end):
+4. Add environment variables (leave the API ones blank for now — you'll fill them in at the end):
    - `NEXT_PUBLIC_API_URL`
    - `NEXT_PUBLIC_API_KEY`
+   - `BASIC_AUTH_USER` (optional) — username for browser password prompt
+   - `BASIC_AUTH_PASS` (optional) — password for browser password prompt
 5. Click **Deploy**
 
 Vercel will build your site and give you a URL like `https://virtual-claude-abc123.vercel.app`. **Copy this URL** — you'll need it in Step 3.
